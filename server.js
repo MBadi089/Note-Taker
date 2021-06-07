@@ -1,26 +1,24 @@
-// add required modules
-const express = require("express");
-const path = require("path");
-
-// Create server application at port 3001
+// adding in libraries
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Read URL or JSON
-app.use(express.urlencoded({extended: true}));
+// linking route files
+const htmlRoutes = require('./routes/htmlRoutes');
+const apiRoutes = require('./routes/apiRoutes');
+
+// port to be used
+const port = process.env.PORT || 3001;
+
+// use commands to run route files
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/api', apiRoutes);
-app.use('/html', htmlRoutes);
+app.use('/', htmlRoutes);
 
-// Include js files
-const apiRoutes = require("./routes/apiRoutes");
-const htmlRoutes = require("./routes/htmlRoutes");
-
-// Use public folder
-app.use(express.static("public"));
-
-// Add listener
-app.listen(PORT, function() {
-    console.log("App listening on PORT: " + PORT);
+// alert that the server is running
+app.listen(port, () => {
+    console.log('Server now being hosted!');
 });
+
+////

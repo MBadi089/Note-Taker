@@ -1,79 +1,48 @@
-// Required Modules
-const fs = require("fs");
-const notesData = require("../db/db.json");
 const router = require('express').Router();
+const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const util = require('util');
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
 
+router.get('/notes', (req, res) => {
+    readFileAsync('./db/db.json', 'utf8')
+        .then(fileContents => res.json(JSON.parse(fileContents)));
+});
 
-//================= FUNCTIONS ==================//
-    function writeToDB(notes){
-        // Converts new JSON Array back to string
-        notes = JSON.stringify(notes);
-        console.log (notes);
-        // Writes String back to db.json
-        fs.writeFileSync("./db/db.json", notes, function(err){
-            if (err) {
-                return console.log(err);
-            }
-        });
-    }
-//==============End of FUNCTIONS ===============//
-
-
-//================= API ROUTES =================//
-
-    // GET Method to return all notes
-    app.get("/api/notes", function(req, res){
-        res.json(notesData);
+router.post('/notes', (req, res) => {
+    const note = req.body;
+    readFileAsync('./db/db.json', 'utf8')
+    .then(fileContents => {
+        const allNotes = JSON.parse(fileContents);
+        allNotes.push(note);
+        const newFileContent = JSON.stringify(allNotes, null, 4)
+        writeFileAsync('./db/db.json', newFileContent)
+            .then(() => res.send(note));
     });
+    const newID = req.body;
+    newID.id = uuidv4();
+});
 
-    // POST Method to add notes
-    app.post("/api/notes", function(req, res){
-
-        // Set unique id to entry
-        if (notesData.length == 0){
-            req.body.id = "0";
-        } else{
-            req.body.id = JSON.stringify(JSON.parse(notesData[notesData.length - 1].id) + 1);
+router.delete('/notes/:id', (req, res) => {
+    fs.readFile('./db/db.json', (err, data) => {
+        if (err) {
+            console.log(err);
         }
-        
-        console.log("req.body.id: " + req.body.id);
-
-        // Pushes Body to JSON Array
-        notesData.push(req.body);
-
-        // Write notes data to database
-        writeToDB(notesData);
-        console.log(notesData);
-
-        // returns new note in JSON format.
-        res.json(req.body);
-    });
-
-    // DELETE Method to delete note with specified ID
-    app.delete("/api/notes/:id", function(req, res){
-        
-        // Obtains id and converts to a string
-        let id = req.params.id.toString();
-        console.log(id);
-
-        // Goes through notesArray searching for matching ID
-        for (i=0; i < notesData.length; i++){
-           
-            if (notesData[i].id == id){
-                console.log("match!");
-                // responds with deleted note
-                res.send(notesData[i]);
-
-                // Removes the deleted note
-                notesData.splice(i,1);
-                break;
-            }
+        else {
+            console.log(JSON.parse(data));
+            const notesArray = JSON.parse(data);
+            const filteredArray = notesArray.filter(item => item.id != req.params.id);
+            fs.writeFile('./db/db.json', JSON.stringify(filteredArray, null, 4), (err) => {
+                if (err) {
+                    console.log(err)
+                }
+                else {
+                res.json(filteredArray)
+                }
+            });
         }
-
-        // Write notes data to database
-        writeToDB(notesData);
-
     });
-//=============End of API ROUTES =================//
+});
 
 module.exports = router;
