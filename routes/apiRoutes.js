@@ -1,8 +1,7 @@
 // Required Modules
 const fs = require("fs");
 const notesData = require("../db/db.json");
-
-module.exports = function(app){
+const router = require('express').Router();
 
 
 //================= FUNCTIONS ==================//
@@ -75,5 +74,6 @@ module.exports = function(app){
         writeToDB(notesData);
 
     });
-};
 //=============End of API ROUTES =================//
+
+module.exports = router;

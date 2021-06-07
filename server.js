@@ -2,9 +2,9 @@
 const express = require("express");
 const path = require("path");
 
-// Create server application at port 3000
+// Create server application at port 3001
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Read URL or JSON
 app.use(express.urlencoded({extended: true}));
