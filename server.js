@@ -9,6 +9,9 @@ const PORT = process.env.PORT || 3000;
 // Read URL or JSON
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(express.static('public'));
+app.use('/api', apiRoutes);
+app.use('/html', htmlRoutes);
 
 // Include js files
 const apiRoutes = require("./routes/apiRoutes");
